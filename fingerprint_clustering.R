@@ -7,7 +7,7 @@ getArgs = function(){
                 help="Fingerprint file name [default: %default]"),
     make_option(c("-m", "--maxCluster"), type="integer", default=6, metavar="integer",
                 help="Maximum number of clusters [default: %default]"),
-    make_option(c("-t", "--classif_type"), type="integer", default=0, metavar="integer",
+    make_option(c("-t", "--classif_type"), type="integer", default=3, metavar="integer",
                 help="Type of classifation [default: automatic selection of best CAH] (1: K-menoids; 2: K-means; 3: Ward; 4: Complete links; 5: Single links; 6: UPGMA; 7: WPGMA; 8: WPGMC; 9: UPGMC)"),
     make_option(c("-adv", "--advanced"), type="logical", action="store_true", 
                 help="Activate advanced mode (print more outputs)"),
@@ -87,9 +87,9 @@ scalecenter = function(d) {
   # without this constante, for advanced outputs, total (max_cluster=nrow(data)) will be different from 1
 }
 
+#dist(d, method = "euclidian") 
 getDistance = function(d, t, k=NULL){
-  if (t > 1) dist(d, method = "euclidian")
-  else getCNH(t,d,k)$diss
+  return (as.dist(d))
 }
 
 #Inputs: x : a matrix
@@ -171,7 +171,7 @@ savePdf = function (f){
 getCAH = function(d, t){
   if(t>2){
     #dis: distance matrix
-    dis = dist(d, method = "euclidian")
+    dis = getDistance(d, t)
     #cah: classification hierarchic ascending
     cah = hclust(dis, method=getClassifType(t))
   #automaticly ordering by clusters
@@ -216,8 +216,8 @@ getClassifType = function(t){
 # k: number of clusterting
 #Ouput: Non-hierarchical classification
 getCNH = function(t, d, k){
-  if (t==1) return (pam(d, k))
-  else if (t==2) return (kmeans(d, centers=k, nstart=100))
+  if (t==1) return (pam(getDistance(d, t), k, diss=T))
+  else if (t==2) return (kmeans(d,centers=k, nstart=100))
 }
 
 # Inputs: 
